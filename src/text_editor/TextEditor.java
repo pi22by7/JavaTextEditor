@@ -1,7 +1,7 @@
 package text_editor;
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
-//import java.awt.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class TextEditor extends JFrame implements ActionListener {
+    private static JFrame frame;
     private static JTextArea area;
 
     //    private static final int returnValue = 0;
@@ -18,10 +19,11 @@ public final class TextEditor extends JFrame implements ActionListener {
     }
 
     public void run() {
-        JFrame frame = new JFrame("Text Editor");
+        frame = new JFrame("πpad");
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+        }
+        catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
             Logger.getLogger(TextEditor.class.getName()).log(Level.SEVERE, null, ex);
         }
         area = new JTextArea();
@@ -63,39 +65,49 @@ public final class TextEditor extends JFrame implements ActionListener {
         switch (ae) {
             case "Open" -> {
                 returnValue = filech.showOpenDialog(null);
+                File file = null;
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    File f = new File(filech.getSelectedFile().getAbsolutePath());
+                    file = new File(filech.getSelectedFile().getAbsolutePath());
                     try {
-                        FileReader read = new FileReader(f);
+                        FileReader read = new FileReader(file);
                         Scanner scan = new Scanner(read);
                         while (scan.hasNextLine()) {
                             String line = scan.nextLine() + "\n";
                             ingest = (ingest == null ? new StringBuilder("null") : ingest).append(line);
                         }
                         area.setText(ingest == null ? null : ingest.toString());
-                    } catch (FileNotFoundException ex) {
+                    }
+                    catch (FileNotFoundException ex) {
                         ex.printStackTrace();
                     }
                 }
+                assert file != null;
+                frame.setTitle("πpad | " +file.getName());
             }
             case "Save" -> {
-//                returnValue = filech.showSaveDialog(null);
-                try {
-                    File f = new File(filech.getSelectedFile().getAbsolutePath());
-                    FileWriter out = new FileWriter(f);
-                    out.write(area.getText());
-                    out.close();
-                } catch (FileNotFoundException ex) {
-//                    Component f = null;
-                    JOptionPane.showMessageDialog(null, "File not found.");
-                } catch (IOException ex) {
-//                    Component f = null;
-                    JOptionPane.showMessageDialog(null, "Error.");
+                returnValue = filech.showSaveDialog(null);
+                File file = null;
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    file = new File(filech.getSelectedFile().getAbsolutePath());
+                    try {
+                        FileWriter out = new FileWriter(file);
+                        out.write(area.getText());
+                        out.close();
+                    }
+                    catch (FileNotFoundException ex) {
+                        Component f = null;
+                        JOptionPane.showMessageDialog(f, "File not found.");
+                    }
+                    catch (IOException ex) {
+                        Component f = null;
+                        JOptionPane.showMessageDialog(f, "Error.");
+                    }
                 }
+                assert file != null;
+                frame.setTitle("πpad | " +file.getName());
             }
             case "New" -> area.setText("");
             case "Quit" -> System.exit(0);
         }
     }
-
 }
