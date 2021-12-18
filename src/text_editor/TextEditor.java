@@ -5,6 +5,7 @@ import javax.swing.undo.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.*;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -16,8 +17,6 @@ public final class TextEditor extends JFrame implements ActionListener {
     private static JCheckBox item_wrap;
     private static UndoManager manager;
 
-    //    private static JScrollBar
-//    private static final int returnValue = 0;
     public TextEditor() {
         run();
     }
@@ -39,14 +38,21 @@ public final class TextEditor extends JFrame implements ActionListener {
         JMenuBar menu_main = new JMenuBar();
 
         JMenu submenu_file = new JMenu("File");
+        submenu_file.setMnemonic(KeyEvent.VK_F);
         JMenu submenu_format = new JMenu("Format");
+        submenu_format.setMnemonic(KeyEvent.VK_R);
         JMenu submenu_edit = new JMenu("Edit");
+        submenu_edit.setMnemonic(KeyEvent.VK_E);
 
         JMenuItem item_new = new JMenuItem("New");
+        item_new.setMnemonic(KeyEvent.VK_N);
         JMenuItem item_open = new JMenuItem("Open");
+        item_open.setMnemonic(KeyEvent.VK_O);
         JMenuItem item_save = new JMenuItem("Save");
+        item_save.setMnemonic(KeyEvent.VK_S);
         JMenuItem item_quit = new JMenuItem("Quit");
         item_wrap = new JCheckBox("Text Wrap", false);
+        item_wrap.setMnemonic(KeyEvent.VK_T);
         JMenuItem item_undo = new JMenuItem("Undo");
         JMenuItem item_redo = new JMenuItem("Redo");
 
@@ -79,6 +85,38 @@ public final class TextEditor extends JFrame implements ActionListener {
 
         manager = new UndoManager();
         area.getDocument().addUndoableEditListener(manager);
+
+        KeyStroke keyStrokeOpen = KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK);
+        item_open.setAccelerator(keyStrokeOpen);
+
+        KeyStroke keyStrokeNew = KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK);
+        item_new.setAccelerator(keyStrokeNew);
+
+        KeyStroke keyStrokeSave = KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK);
+        item_save.setAccelerator(keyStrokeSave);
+
+        KeyStroke keyStrokeUndo = KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK);
+        item_undo.setAccelerator(keyStrokeUndo);
+
+        KeyStroke keyStrokeRedo = KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_DOWN_MASK);
+        item_redo.setAccelerator(keyStrokeRedo);
+    }
+
+    private void undo() {
+        try {
+            if (manager.canUndo()) {
+                manager.undo();
+            }
+        }
+        catch (CannotUndoException ignore) {}
+    }
+    private void redo() {
+        try {
+            if (manager.canRedo()) {
+                manager.redo();
+            }
+        }
+        catch (CannotRedoException ignore) {}
     }
 
     @Override
@@ -108,9 +146,13 @@ public final class TextEditor extends JFrame implements ActionListener {
                     catch (FileNotFoundException ex) {
                         ex.printStackTrace();
                     }
+                    catch (NullPointerException ex) {
+                        Component f = null;
+                        JOptionPane.showMessageDialog(f, "No file was selected.");
+                    }
                 }
-                assert file != null;
-                frame.setTitle("πpad | " + file.getName());
+//                assert file != null;
+                frame.setTitle("πpad" + (file != null ? " | " +file.getName() : ""));
             }
             case "Save" -> {
                 returnValue = filech.showSaveDialog(null);
@@ -130,11 +172,18 @@ public final class TextEditor extends JFrame implements ActionListener {
                         Component f = null;
                         JOptionPane.showMessageDialog(f, "Error.");
                     }
+                    catch (NullPointerException ex) {
+                        Component f = null;
+                        JOptionPane.showMessageDialog(f, "No file was selected.");
+                    }
                 }
-                assert file != null;
-                frame.setTitle("πpad | " +file.getName());
+//                assert file != null;
+                frame.setTitle("πpad" + (file != null ? " | "+file.getName() : ""));
             }
-            case "New" -> area.setText("");
+            case "New" -> {
+                area.setText("");
+                frame.setTitle("πpad");
+            }
             case "Text Wrap" -> {
                 boolean b = item_wrap.isSelected();
                 item_wrap.setSelected(b);
@@ -149,22 +198,8 @@ public final class TextEditor extends JFrame implements ActionListener {
                     area.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
                 }
             }
-            case "Undo" -> {
-                try {
-                    if (manager.canUndo()) {
-                        manager.undo();
-                    }
-                }
-                catch (CannotUndoException ignore) {}
-            }
-            case "Redo" -> {
-                try {
-                    if (manager.canRedo()) {
-                        manager.redo();
-                    }
-                }
-                catch (CannotRedoException ignore) {}
-            }
+            case "Undo" -> undo();
+            case "Redo" -> redo();
             case "Quit" -> System.exit(0);
         }
     }
