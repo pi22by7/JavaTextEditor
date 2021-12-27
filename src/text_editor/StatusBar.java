@@ -12,6 +12,6 @@ public class StatusBar extends JPanel {
     }
     private void init() {
         JLabel l = new JLabel();
-        l.setText("");
+        l.setText("Empty StatusBar");
     }
 }

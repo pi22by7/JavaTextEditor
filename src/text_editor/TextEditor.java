@@ -16,12 +16,13 @@ import java.util.logging.Logger;
 
 public class TextEditor extends JFrame implements ActionListener {
     protected static JFrame frame;
-    private static JTextArea area;
+    protected static JTextArea area;
     private static JCheckBox item_wrap;
+    private static JCheckBox item_dark;
     private static UndoManager manager;
     private JPopupMenu rcontext;
     private int returnValue;
-    private static int size = 20;
+    protected static int size = 20;
 
     public TextEditor() {
         run();
@@ -30,12 +31,14 @@ public class TextEditor extends JFrame implements ActionListener {
     public void run() {
         frame = new JFrame("πpad");
         frame.setLayout(new BorderLayout());
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
         catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
             Logger.getLogger(TextEditor.class.getName()).log(Level.SEVERE, null, ex);
         }
+
         area = new JTextArea();
         Font f = new Font("serif", Font.PLAIN, size);
         area.setFont(f);
@@ -62,6 +65,7 @@ public class TextEditor extends JFrame implements ActionListener {
         item_save.setMnemonic(KeyEvent.VK_S);
         JMenuItem item_quit = new JMenuItem("Quit");
         item_wrap = new JCheckBox("Text Wrap", false);
+        item_dark = new JCheckBox("Dark Mode", false);
         item_wrap.setMnemonic(KeyEvent.VK_T);
         JMenuItem item_undo = new JMenuItem("Undo");
         JMenuItem item_redo = new JMenuItem("Redo");
@@ -79,6 +83,7 @@ public class TextEditor extends JFrame implements ActionListener {
         item_save.addActionListener(this);
         item_quit.addActionListener(this);
         item_wrap.addActionListener(this);
+        item_dark.addActionListener(this);
         item_undo.addActionListener(this);
         item_redo.addActionListener(this);
         item_copy.addActionListener(this);
@@ -108,6 +113,7 @@ public class TextEditor extends JFrame implements ActionListener {
         submenu_edit.add(item_date);
 
         submenu_format.add(item_wrap);
+        submenu_format.add(item_dark);
         submenu_format.add(item_font);
 
         menu_main.add(submenu_file);
@@ -315,6 +321,19 @@ public class TextEditor extends JFrame implements ActionListener {
         }
     }
 
+    private void dark(){
+        boolean b = item_dark.isSelected();
+        item_dark.setSelected(b);
+        if(item_dark.isSelected()) {
+            area.setBackground(Color.BLACK);
+            area.setForeground(Color.WHITE);
+        }
+        else {
+            area.setBackground(Color.WHITE);
+            area.setForeground(Color.BLACK);
+        }
+    }
+
     private void newF() {
         area.setText("");
         frame.setTitle("πpad");
@@ -365,6 +384,7 @@ public class TextEditor extends JFrame implements ActionListener {
             case "Decrease Font Size" -> FontDec();
             case "Font..." -> changeFont();
             case "Date and Time" -> DaTime();
+            case "Dark Mode" -> dark();
             case "Quit" -> System.exit(0);
 //            default -> throw new IllegalStateException("Unexpected value: " + ae);
         }
